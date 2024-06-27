@@ -1,29 +1,31 @@
 import re
 
 
-def token(typ):
+token_patts = {
+    'SPACE': r'\s+',
+    'NAME': r'\w+',
+    'MACRO': r'#.*',
+    'COMMENT': r'//.*|/\*[\s\S]*?\*/',
+    'STRING': r'"[^"]*"',
+    'SEPRATOR': '[%s]' % re.escape(',;()[]{}'),
+    'OPERATOR': '[%s]+' % re.escape('+-*/%<=>|&!?:'),
+}
+
+
+def Token(typ):
     def action(scanner, token):
         return typ, token
     return action
 
 
-scanner = re.Scanner([
-    (r'\s+', None),
-    (r'\w+', token('NAME')),
-    (r'#.*', token('MACRO')),
-    (r'//.*|/\*[\s\S]*?\*/', token('COMMENT')),
-    (r'"[^"]*"', token('STRING')),
-    ('[%s]' % re.escape(',;()[]{}'), token('SEPRATOR')),
-    ('[%s]+' % re.escape('+-*/%<=>|&!?:'), token('OPERATOR')),
-])
-
-
 def Parse(text):
+    scanner = re.Scanner([(patt, Token(typ)) for typ, patt in token_patts.items()])
     results, remainder = scanner.scan(text)
     assert remainder == '', repr(remainder[:50])
 
     for typ, name in results:
-        print(f'{typ:>9}: {name}')
+        if typ != 'SPACE':
+            print(f'{typ:>9}: {name}')
 
 
 def ParseFile(file):
