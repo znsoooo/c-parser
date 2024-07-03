@@ -98,9 +98,10 @@ def ParseText(text):
                 node = CNode(node, name, PREFIX_SPACE)
                 prefix_next = PREFIX_INDENT
             elif name in '}])':
+                prefix = PREFIX_NONE if len(node) == 0 else PREFIX_INDENT
                 node = node.parent
-                CNode(node, name, PREFIX_INDENT)
-                prefix_next = PREFIX_INDENT
+                CNode(node, name, prefix)
+                prefix_next = PREFIX_INDENT if name == '}' else PREFIX_SPACE
             elif name in ',;':
                 CNode(node, name, PREFIX_NONE)
                 prefix_next = PREFIX_INDENT
